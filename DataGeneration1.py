@@ -33,15 +33,17 @@ class ImageGenerator:
         shapes_info = []
         bounding_box_coords = []
 
-        
         for _ in range(num_shapes):
+            max_attempts = 1000;
             shape_type = random.choice(['circle', 'triangle', 'rectangle', 'hexagon', 'diamond'])
             color = [random.randint(0, 255) for _ in range(3)]
             intersection = False
             id = 0
+
             if shape_type == 'circle':
+                attempts = 0
                 color = [random.randint(0, 255) for _ in range(3)]
-                while intersection == False:
+                while not intersection and attempts < max_attempts:
                     r = random.randint(13, 50)
                     d = 2 * r
                     x_center = random.randint(0, 256 - 2*d) + d
@@ -50,44 +52,56 @@ class ImageGenerator:
                     no_intersection = all(self.check_intersection(existing_rect, new_bounding_box) for existing_rect in bounding_box_coords)
                     if no_intersection:
                         cv2.circle(image, (x_center, y_center), r, color, -1)
-                        cv2.rectangle(image, (x_center - r, y_center - r), (x_center + r, y_center + r), color=color, thickness=2)
+                        #cv2.rectangle(image, (x_center - r, y_center - r), (x_center + r, y_center + r), color=color, thickness=2)
                         bounding_box_coords.append(new_bounding_box)
                         id = 1
                         intersection = True
+                    attempts += 1
             
             elif shape_type == 'triangle':
+                attempts = 0
                 color = [random.randint(0, 255) for _ in range(3)]
-                while intersection == False:
+                while not intersection and attempts < max_attempts:
                     x1, y1 = random.randint(80, 254), random.randint(80, 254)
-                    x2, y2 = random.randint(x1 - 75, x1 + 75), random.randint(y1 - 75, y1 + 75)
-                    x3, y3 = random.randint(min(x1, x2), max(x1, x2)), random.randint(min(y1, y2), max(y1, y2))                        
+                    x2 = random.randint(x1 - 25, x1 + 75)
+                    y2 = random.randint(y1 - 25, y1 + 75)
+                    #x3, y3 = random.randint(min(x1, x2), max(x1, x2)), random.randint(min(y1, y2), max(y1, y2)) 
+                    third_side_length = random.randint(35, 65)
+                    angle = random.uniform(0, 2*math.pi)
+                    x3 = int(x1 + third_side_length * math.cos(angle))
+                    y3 = int(y1 + third_side_length * math.sin(angle))                       
                     triangle_points = np.array([[x1, y1], [x2, y2], [x3, y3]], dtype=np.int32)
                     
                     new_bounding_box = (min(x1, x2, x3), min(y1, y2, y3), max(x1, x2, x3), max(y1, y2, y3))
                     no_intersection = all(self.check_intersection(existing_rect, new_bounding_box) for existing_rect in bounding_box_coords)
                     if no_intersection:
-                        cv2.polylines(image, [triangle_points], isClosed=True, color=color, thickness=2)
-                        cv2.rectangle(image, (new_bounding_box[0], new_bounding_box[1]), (new_bounding_box[2], new_bounding_box[3]), color=(0, 255, 0), thickness=2)
+                        cv2.fillPoly(image, [triangle_points], color=color)
+                        #cv2.polylines(image, [triangle_points], isClosed=True, color=color, thickness=2)
+                        #cv2.rectangle(image, (new_bounding_box[0], new_bounding_box[1]), (new_bounding_box[2], new_bounding_box[3]), color=(0, 255, 0), thickness=2)
                         bounding_box_coords.append(new_bounding_box)
                         id = 2
                         intersection = True
+                    attempts += 1
 
             elif shape_type == 'rectangle':
+                attempts = 0
                 color = [random.randint(0, 255) for _ in range(3)]
-                while not intersection:
+                while not intersection and attempts < max_attempts:
                     x, y = random.randint(4, 256 - 75), random.randint(4, 256 - 75)
                     w, h = random.randint(12, 75), random.randint(12, 75)
                     new_bounding_box = (x, y, x + w, y + h)
                     no_intersection = all(self.check_intersection(existing_rect, new_bounding_box) for existing_rect in bounding_box_coords)
                     if no_intersection:
-                        cv2.rectangle(image, (x, y), (x+w, y+h), color=color, thickness=2)
+                        cv2.rectangle(image, (x, y), (x+w, y+h), color=color, thickness=-1)
                         bounding_box_coords.append(new_bounding_box)
                         id = 3
                         intersection = True
+                    attempts += 1
             
             elif shape_type == 'diamond':
+                attempts = 0
                 color = [random.randint(0, 255) for _ in range(3)]
-                while not intersection:
+                while not intersection and attempts < max_attempts:
                     x_center = random.randint(75, 256 - 75)
                     y_center = random.randint(75, 256 - 75)
                     side_length = random.randint(12, 60)
@@ -104,16 +118,19 @@ class ImageGenerator:
                     new_bounding_box = (x_min, y_min, x_max, y_max)
                     no_intersection = all(self.check_intersection(existing_rect, new_bounding_box) for existing_rect in bounding_box_coords)
                     if no_intersection:
-                        cv2.polylines(image, [diamond_points], isClosed=True, color=color, thickness=2)
-                        cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 255, 0), thickness=2)
+                        cv2.fillPoly(image, [diamond_points], color=color)
+                        #cv2.polylines(image, [diamond_points], isClosed=True, color=color, thickness=2)
+                        #cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 255, 0), thickness=2)
                         bounding_box_coords.append(new_bounding_box)
                         id = 4
                         intersection = True
+                    attempts += 1
 
             else:
             #elif shape_type == 'hexagon':
+                attempts = 0
                 color = [random.randint(0, 255) for _ in range(3)]
-                while not intersection:
+                while not intersection and attempts < max_attempts:
                     x_center = random.randint(75, 256 - 75)
                     y_center = random.randint(75, 256 - 75)
                     radius = random.randint(12, 50)
@@ -133,11 +150,13 @@ class ImageGenerator:
                     new_bounding_box = (x_min, y_min, x_max, y_max)
                     no_intersection = all(self.check_intersection(existing_rect, new_bounding_box) for existing_rect in bounding_box_coords)
                     if no_intersection:
-                        cv2.polylines(image, [hexagon_points], isClosed=True, color=color, thickness=2)
-                        cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 255, 0), thickness=2)
+                        cv2.fillPoly(image, [hexagon_points], color=color)
+                        #cv2.polylines(image, [hexagon_points], isClosed=True, color=color, thickness=2)
+                        #cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 255, 0), thickness=2)
                         bounding_box_coords.append(new_bounding_box)
                         id = 5
-                        intersection = True                            
+                        intersection = True     
+                    attempts += 1
             
             shape_info = {
                 "id": id,
@@ -160,14 +179,17 @@ class ImageGenerator:
         self.image_counter += 1
         cv2.imwrite(image_path, image)
 
-        print(f"Shape type: {shape_type}")
-        print(f"New bounding box: {new_bounding_box}")
-        print(f"Existing bounding boxes: {bounding_box_coords}")
+        #print(f"Shape type: {shape_type}")
+        #print(f"New bounding box: {new_bounding_box}")
+        #print(f"Existing bounding boxes: {bounding_box_coords}")
         
         with open(json_info, 'w') as json_file:
             json.dump(shapes_info, json_file, indent=4)
+        
+        return image, shapes_info
             
+        
 if __name__ == '__main__':
-    generator = ImageGenerator(output_folder='generated_images')
-    for _ in range(100):
+    generator = ImageGenerator(output_folder='generated_images_5000')
+    for _ in range(5000):
         generator.generate_image()
