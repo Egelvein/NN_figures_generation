@@ -3,7 +3,7 @@
 """
 Created on Wed Aug 16 13:51:51 2023
 
-@author: energia
+@author: Sinyaev V.V.
 """
 
 import cv2
@@ -54,7 +54,7 @@ class ImageGenerator:
                         cv2.circle(image, (x_center, y_center), r, color, -1)
                         #cv2.rectangle(image, (x_center - r, y_center - r), (x_center + r, y_center + r), color=color, thickness=2)
                         bounding_box_coords.append(new_bounding_box)
-                        id = 1
+                        id = 0
                         intersection = True
                     attempts += 1
             
@@ -79,7 +79,7 @@ class ImageGenerator:
                         #cv2.polylines(image, [triangle_points], isClosed=True, color=color, thickness=2)
                         #cv2.rectangle(image, (new_bounding_box[0], new_bounding_box[1]), (new_bounding_box[2], new_bounding_box[3]), color=(0, 255, 0), thickness=2)
                         bounding_box_coords.append(new_bounding_box)
-                        id = 2
+                        id = 1
                         intersection = True
                     attempts += 1
 
@@ -94,7 +94,7 @@ class ImageGenerator:
                     if no_intersection:
                         cv2.rectangle(image, (x, y), (x+w, y+h), color=color, thickness=-1)
                         bounding_box_coords.append(new_bounding_box)
-                        id = 3
+                        id = 2
                         intersection = True
                     attempts += 1
             
@@ -122,7 +122,7 @@ class ImageGenerator:
                         #cv2.polylines(image, [diamond_points], isClosed=True, color=color, thickness=2)
                         #cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 255, 0), thickness=2)
                         bounding_box_coords.append(new_bounding_box)
-                        id = 4
+                        id = 3
                         intersection = True
                     attempts += 1
 
@@ -154,7 +154,7 @@ class ImageGenerator:
                         #cv2.polylines(image, [hexagon_points], isClosed=True, color=color, thickness=2)
                         #cv2.rectangle(image, (x_min, y_min), (x_max, y_max), (0, 255, 0), thickness=2)
                         bounding_box_coords.append(new_bounding_box)
-                        id = 5
+                        id = 4
                         intersection = True     
                     attempts += 1
             
@@ -190,6 +190,6 @@ class ImageGenerator:
             
         
 if __name__ == '__main__':
-    generator = ImageGenerator(output_folder='generated_images_5000')
-    for _ in range(5000):
+    generator = ImageGenerator(output_folder='generated_images_3')
+    for _ in range(100):
         generator.generate_image()
